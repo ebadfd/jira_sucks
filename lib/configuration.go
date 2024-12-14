@@ -11,7 +11,12 @@ var globalConfiguration = Configuration{
 }
 
 type Configuration struct {
-	Port string `mapstructure:"PORT"`
+	Port             string `mapstructure:"PORT"`
+	JiraClientId     string `mapstructure:"JIRA_CLIENT_ID"`
+	JiraClientSecret string `mapstructure:"JIRA_CLIENT_SECRET"`
+	JiraAuthUri      string `mapstructure:"JIRA_AUTH_URI"`
+	JiraTokenUri     string `mapstructure:"JIRA_TOKEN_URI"`
+	SessionSecret    string `mapstructure:"SESSION_KEY"`
 }
 
 func (c Configuration) Validate() error {
@@ -23,6 +28,11 @@ func NewConfiguration(logger Logger) *Configuration {
 
 	for _, key := range []string{
 		"PORT",
+		"JIRA_AUTH_URL",
+		"JIRA_TOKEN_URI",
+		"JIRA_CLIENT_ID",
+		"JIRA_CLIENT_SECRET",
+		"SESSION_KEY",
 	} {
 		switch key {
 		default:
