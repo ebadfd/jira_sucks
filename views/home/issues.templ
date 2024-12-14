@@ -1,0 +1,77 @@
+package home
+
+import "github.com/ebadfd/jira_sucks/views/layouts"
+import "github.com/andygrunwald/go-jira"
+import "fmt"
+
+css disableOption() {
+	disabled: 'true';
+	cursor: not-allowed! important;
+}
+
+templ Pagination(startAt, maxResults, total int) {
+	<a
+		href={ templ.SafeURL(fmt.Sprintf("?startAt=%d&maxResults=%d", startAt-maxResults, maxResults)) }
+		class={ "button", templ.KV(disableOption(), startAt == 0) }
+	>
+		Previous
+	</a>
+	<span>{ fmt.Sprintf("%d-%d", startAt + maxResults, total) }</span>
+	<a
+		href={ templ.SafeURL(fmt.Sprintf("?startAt=%d&maxResults=%d", startAt+maxResults, maxResults)) }
+		class={ "button", templ.KV(disableOption(), startAt + maxResults >= total) }
+	>
+		Next
+	</a>
+}
+
+templ Issues(results []jira.Issue, startAt, maxResults, total int, jql string) {
+	@layouts.Base() {
+		<div>
+			<form class="form">
+				<fieldset class="form-group">
+					<label for="jql">JQL:</label>
+					<input id="jql" type="text" value={ jql } class="form-control" name="jql"/>
+				</fieldset>
+			</form>
+		</div>
+		<table>
+			<tr>
+				<th>Type</th>
+				<th>Key</th>
+				<th>Summary</th>
+				<th>Priority</th>
+				<th>Status </th>
+			</tr>
+			for _, item := range results {
+				<tr>
+					<td>
+						<img
+							src={ item.Fields.Type.IconURL }
+							alt="Status Icon"
+							style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;"
+						/>
+					</td>
+					<td>
+						<a href={ templ.SafeURL(fmt.Sprintf("/app/%s/issues/%s", item.Fields.Project.Key, item.Key)) }>{ item.Key }</a>
+					</td>
+					<td>
+						<a href={ templ.SafeURL(fmt.Sprintf("/app/%s/issues/%s", item.Fields.Project.Key, item.Key)) }>{ item.Fields.Summary }</a>
+					</td>
+					<td>{ item.Fields.Priority.Name }</td>
+					<td>
+						<img
+							src={ item.Fields.Status.IconURL }
+							alt="Status Icon"
+							style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;"
+						/>
+						{ item.Fields.Status.Name }
+					</td>
+				</tr>
+			}
+		</table>
+		<div>
+			@Pagination(startAt, maxResults, total)
+		</div>
+	}
+}

@@ -6,7 +6,9 @@ import (
 
 	"github.com/ebadfd/jira_sucks/lib"
 	"github.com/ebadfd/jira_sucks/pkg/handlers"
+	"github.com/ebadfd/jira_sucks/pkg/issues"
 	"github.com/ebadfd/jira_sucks/pkg/oauth"
+	"github.com/ebadfd/jira_sucks/pkg/projects"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 )
@@ -24,9 +26,12 @@ func (s *ServerCommand) Run() lib.CommandRunner {
 		conf *lib.Configuration,
 		logger lib.Logger,
 		oauth *oauth.JiraOAuthServiceImpl,
+		projects *projects.ProjectServiceImpl,
+		issues *issues.IssueServiceImpl,
 	) {
 		serverHost := fmt.Sprintf(":%s", conf.Port)
 		r := mux.NewRouter()
+
 		r.Use(handlers.TrailingSlashMiddleware)
 
 		r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +45,13 @@ func (s *ServerCommand) Run() lib.CommandRunner {
 		app := r.PathPrefix("/app").Subrouter()
 		app.Use(handlers.AuthMiddleware)
 
-		app.HandleFunc("", handlers.Test)
+		app.HandleFunc("", projects.Projects)
+		app.HandleFunc("/{key}", issues.Issues)
+		app.HandleFunc("/{key}/issues/{issueKey}", issues.IssueDetails)
+
+		s := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
+
+		r.PathPrefix("/static/").Handler(s)
 
 		logger.Info(fmt.Sprintf("starting the web server on %s", serverHost))
 		http.ListenAndServe(serverHost, r)

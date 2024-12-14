@@ -1,0 +1,84 @@
+package home
+
+import "github.com/ebadfd/jira_sucks/views/layouts"
+import "github.com/andygrunwald/go-jira"
+import "fmt"
+import "strings"
+import "github.com/ebadfd/jira_sucks/lib"
+
+templ Profile(displayName, email, imageUrl string) {
+	<div class="card avatar">
+		<img src={ imageUrl } alt={ fmt.Sprintf("%s's Profile Image", displayName) } class="icon"/>
+		<div>
+			<span>{ displayName }</span>
+			<span>{ email }</span>
+		</div>
+	</div>
+}
+
+templ BugDescriptionField(fields jira.CustomFields) {
+	if fields["customfield_10178"] != "" {
+		<p>Bug Description </p>
+		<p>{ string(lib.MarkdownToHtml([]byte(fields["customfield_10178"]))) }</p>
+		// TODO: implement dompurify here
+	}
+}
+
+templ FixVersion(results []*jira.FixVersion, projectKey string) {
+	if len(results) > 0 && results[0] != nil {
+		<p>Fix versions </p>
+		<a href={ templ.SafeURL(fmt.Sprintf("/app/%s/release/%s", projectKey, results[0].ID)) }>{ results[0].Name }</a>
+	}
+}
+
+templ Issue(result *jira.Issue, fields jira.CustomFields) {
+	@layouts.Base() {
+		<div style="display: flex; align-items: center;">
+			<div>
+				<a href={ templ.SafeURL(fmt.Sprintf("/app/%s", result.Fields.Project.Key)) }>{ result.Fields.Project.Key }</a>
+			</div>
+			<div>/ </div>
+			<div>
+				<img
+					src={ result.Fields.Type.IconURL }
+					alt="Status Icon"
+					style="width: 16px; height: 16px;vertical-align: middle;"
+				/>
+				<a href={ templ.SafeURL(fmt.Sprintf("/app/%s/issues/%s", result.Fields.Project.Key, result.Key)) }>{ result.Key }</a>
+			</div>
+		</div>
+		<br/>
+		<h2 class="issue-summary">{ strings.TrimSpace(result.Fields.Summary) } </h2>
+		<p>Status </p>
+		<div>
+			<img
+				src={ result.Fields.Status.IconURL }
+				alt="Status Icon"
+				style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;"
+			/>
+			<p>{ result.Fields.Status.Name } </p>
+		</div>
+		<h3>Details </h3>
+		<p>Reporter </p>
+		@Profile(result.Fields.Creator.DisplayName, result.Fields.Creator.EmailAddress, result.Fields.Creator.AvatarUrls.Four8X48)
+		<p>Assignee </p>
+		@Profile(result.Fields.Assignee.DisplayName, result.Fields.Assignee.EmailAddress, result.Fields.Assignee.AvatarUrls.Four8X48)
+		<p>Priority </p>
+		<div>
+			<img
+				src={ result.Fields.Priority.IconURL }
+				alt="Status Icon"
+				style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;"
+			/>
+			{ result.Fields.Priority.Name }
+		</div>
+		<p>Labels </p>
+		for _, item := range result.Fields.Labels {
+			<a href={ templ.SafeURL(fmt.Sprintf("/app/%s?jql=labels %3D \"%s\"", result.Fields.Project.Key, item)) }>{ item }</a>
+		}
+		<p>Description </p>
+		<p>{ result.Fields.Description } </p>
+		@BugDescriptionField(fields)
+		@FixVersion(result.Fields.FixVersions, result.Fields.Project.Key)
+	}
+}

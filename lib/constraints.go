@@ -11,3 +11,10 @@ const (
 
 	AuthResults = "auth.results"
 )
+
+type AuthSession struct {
+	CloudId      string
+	Token        string
+	DisplayName  string
+	ProfileImage string
+}

@@ -1,0 +1,24 @@
+package layouts
+
+import "github.com/ebadfd/jira_sucks/views/components"
+
+templ Base() {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<title>Simple Jira Client</title>
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hack/0.8.1/hack.css"/>
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hack/0.8.1/dark-grey.css"/>
+			<link rel="stylesheet" href="/static/style.css"/>
+		</head>
+		<div class="progress" style="height: 2px;">
+			<div class="indeterminate" style="background-color: #ff2e88;"></div>
+		</div>
+		<body class="snow hack dark-grey" hx-ext="preload" hx-indicator=".progress">
+			<div class="container">
+				@components.Navigation()
+				{ children... }
+			</div>
+		</body>
+	</html>
+}

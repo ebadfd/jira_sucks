@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -10,20 +9,6 @@ import (
 	"github.com/ebadfd/jira_sucks/lib"
 	"github.com/gorilla/sessions"
 )
-
-type AuthSession struct {
-	Token        string
-	DisplayName  string
-	ProfileImage string
-}
-
-func Test(w http.ResponseWriter, r *http.Request) {
-	adm := context.Get(r, lib.AuthResults).(AuthSession)
-
-	fmt.Println(adm)
-
-	w.Write([]byte("This is my home page"))
-}
 
 // TODO: update this
 var Store = sessions.NewCookieStore([]byte("secret_key"))
@@ -45,12 +30,18 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		token := session.Values[lib.OAuthStateToken]
 		displayName := profileSession.Values[lib.ProfileUserDisplayName]
 		image := profileSession.Values[lib.ProfileUserImage]
+		cloudId := session.Values[lib.OAuthCloudId]
 
 		if token == nil {
 			panic("no auth")
 		}
 
-		authResults := AuthSession{
+		if cloudId == nil {
+			panic("no auth")
+		}
+
+		authResults := lib.AuthSession{
+			CloudId:      cloudId.(string),
 			Token:        token.(string),
 			DisplayName:  displayName.(string),
 			ProfileImage: image.(string),

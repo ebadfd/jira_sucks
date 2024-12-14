@@ -76,6 +76,7 @@ func (h *JiraOAuthServiceImpl) OAuthJiraCallback(w http.ResponseWriter, r *http.
 	}
 
 	session.Values[lib.OAuthStateToken] = res.AccessToken
+	session.Values[lib.OAuthCloudId] = accessibleResource.ID
 	profileSession.Values[lib.ProfileUserDisplayName] = profile.DisplayName
 	profileSession.Values[lib.ProfileUserImage] = profile.AvatarUrls.Four8X48
 

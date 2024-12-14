@@ -1,0 +1,41 @@
+html {
+  font-size: 14px;
+}
+
+.dark-grey {
+  background-color: #181818;
+  color: #fff;
+}
+
+.hack h1 {
+  font-size: 1.5rem;
+  font-style: normal;
+  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
+    Bitstream Vera Sans Mono, Courier New, monospace, serif;
+}
+
+.container {
+  min-width: 320px;
+  max-width: 1400px;
+}
+
+.avatar {
+    align-items: center;
+    max-width: 350px;
+    display: flex;
+    padding: 3px;
+    border-color: rgba(38, 38, 38, 0.78) !important;
+}
+
+
+.avatar .icon {
+   max-width: 40px;
+   height: 40px;
+   border-radius: 50%;
+   margin-right: 15px;
+   object-fit: cover;
+}
+
+.issue-summary {
+  font-size: 1.5rem !important;
+}

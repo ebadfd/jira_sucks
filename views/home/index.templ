@@ -1,0 +1,15 @@
+package home
+
+import "github.com/ebadfd/jira_sucks/views/layouts"
+import "github.com/andygrunwald/go-jira"
+import "fmt"
+
+templ Index(results *jira.ProjectList) {
+	@layouts.Base() {
+		<ul>
+			for _, item := range *results {
+				<li><a href={ templ.SafeURL(fmt.Sprintf("/app/%s", item.Key)) }>{ item.Name }</a></li>
+			}
+		</ul>
+	}
+}
