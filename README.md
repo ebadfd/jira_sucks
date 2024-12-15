@@ -43,7 +43,7 @@ If you find this project useful and want to improve it, feel free to submit issu
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](https://github.com/ebadfd/jira_sucks#MIT-1-ov-file).
 
 ## Why "Jira_Sucks"?
 
