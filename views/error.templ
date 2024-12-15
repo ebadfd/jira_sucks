@@ -5,11 +5,7 @@ import "strings"
 
 templ ErrorPage(er error) {
 	@layouts.Base() {
-		if (strings.Contains(er.Error(), "Login success")) {
-			<h2>Successfully authenticated </h2>
-		} else {
-			<h2>Something went wrong </h2>
-		}
+		<h2>Something went wrong </h2>
 		<p>{ er.Error() }</p>
 		if (strings.Contains(er.Error(), "Status code: 401")) {
 			<p>The JIRA api token must have been expired </p>

@@ -15,4 +15,5 @@ RUN apt-get install ca-certificates -y
 RUN update-ca-certificates
 
 COPY --from=builder /run-app /usr/local/bin/
+COPY --from=builder /usr/src/app/static /usr/local/bin/
 CMD ["run-app", "server"]

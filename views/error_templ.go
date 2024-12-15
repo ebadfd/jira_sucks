@@ -44,25 +44,14 @@ func ErrorPage(er error) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			if strings.Contains(er.Error(), "Login success") {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h2>Successfully authenticated </h2>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h2>Something went wrong </h2>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <p>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h2>Something went wrong </h2><p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(er.Error())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/error.templ`, Line: 13, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/error.templ`, Line: 9, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
