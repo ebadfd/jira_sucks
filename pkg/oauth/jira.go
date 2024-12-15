@@ -1,7 +1,6 @@
 package oauth
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
