@@ -10,18 +10,41 @@ templ Profile(displayName, email, imageUrl string) {
 	<div class="card avatar">
 		<img src={ imageUrl } alt={ fmt.Sprintf("%s's Profile Image", displayName) } class="icon"/>
 		<div>
-			<span>{ displayName }</span>
-			<span>{ email }</span>
+			<p class="text name">{ displayName }</p>
+			<p class="text email">{ email }</p>
+		</div>
+	</div>
+}
+
+templ Priority(name, iconUrl string) {
+	<div class="card avatar priority">
+		<img src={ iconUrl } alt={ fmt.Sprintf("%s", name) } class="icon"/>
+		<div>
+			<p class="text name">{ name }</p>
 		</div>
 	</div>
 }
 
 templ BugDescriptionField(fields jira.CustomFields) {
 	if fields["customfield_10178"] != "" {
-		<p>Bug Description </p>
-		<p>{ string(lib.MarkdownToHtml([]byte(fields["customfield_10178"]))) }</p>
-		// TODO: implement dompurify here
+		<h3>Bug Description </h3>
+		<div
+			id="bug-description"
+			bug-description-data={ templ.JSONString(
+				string(lib.MarkdownToHtml(fields["customfield_10178"])),
+			) }
+		></div>
 	}
+}
+
+templ DescriptionField(field string) {
+	<h3>Description </h3>
+	<div
+		id="description"
+		description-data={ templ.JSONString(
+				string(lib.MarkdownToHtml(field)),
+			) }
+	></div>
 }
 
 templ FixVersion(results []*jira.FixVersion, projectKey string) {
@@ -31,54 +54,157 @@ templ FixVersion(results []*jira.FixVersion, projectKey string) {
 	}
 }
 
-templ Issue(result *jira.Issue, fields jira.CustomFields) {
+templ Issue(result *jira.Issue, fields jira.CustomFields, transitions []jira.Transition) {
 	@layouts.Base() {
-		<div style="display: flex; align-items: center;">
-			<div>
-				<a href={ templ.SafeURL(fmt.Sprintf("/app/%s", result.Fields.Project.Key)) }>{ result.Fields.Project.Key }</a>
+		<nav aria-label="Breadcrumb" class="breadcrumb" style="margin-bottom: 20px;">
+			<ul>
+				<li>
+					<a href={ templ.SafeURL("/app") }>Projects</a>
+				</li>
+				<li>
+					<a href={ templ.SafeURL(fmt.Sprintf("/app/%s", result.Fields.Project.Key)) }>{ result.Fields.Project.Key }</a>
+				</li>
+				<li>
+					<div>
+						<img
+							src={ result.Fields.Type.IconURL }
+							alt="Status Icon"
+							style="width: 16px; height: 16px;vertical-align: middle;"
+						/>
+						<a href={ templ.SafeURL(fmt.Sprintf("/app/%s/issues/%s", result.Fields.Project.Key, result.Key)) }>{ result.Key }</a>
+					</div>
+				</li>
+			</ul>
+		</nav>
+		<div class="grid">
+			<div class="cell -8of12">
+				<div class="content">
+					<h2 class="issue-summary">{ strings.TrimSpace(result.Fields.Summary) } </h2>
+					<br/>
+					@DescriptionField(result.Fields.Description)
+					<br/>
+					@BugDescriptionField(fields)
+					<br/>
+					if len(result.Fields.IssueLinks) > 0 {
+						<h3>Linked issues</h3>
+						<ul>
+							for _, item := range result.Fields.IssueLinks {
+								if item.InwardIssue != nil {
+									<li>
+										<strong>{ item.Type.Inward }</strong>
+										<a href={ templ.SafeURL(fmt.Sprintf("/app/%s/issues/%s", result.Fields.Project.Key, item.InwardIssue.Key)) }>{ item.InwardIssue.Fields.Summary }</a>
+									</li>
+								}
+								if item.OutwardIssue != nil {
+									<li>
+										<strong>{ item.Type.Outward }</strong>
+										<a href={ templ.SafeURL(fmt.Sprintf("/app/%s/issues/%s", result.Fields.Project.Key, item.OutwardIssue.Key)) }>{ item.OutwardIssue.Fields.Summary }</a>
+									</li>
+								}
+							}
+						</ul>
+					}
+				</div>
 			</div>
-			<div>/ </div>
-			<div>
-				<img
-					src={ result.Fields.Type.IconURL }
-					alt="Status Icon"
-					style="width: 16px; height: 16px;vertical-align: middle;"
-				/>
-				<a href={ templ.SafeURL(fmt.Sprintf("/app/%s/issues/%s", result.Fields.Project.Key, result.Key)) }>{ result.Key }</a>
+			<div class="cell -4of12">
+				<div style="margin-bottom: 15px;">
+					<img
+						src={ result.Fields.Status.IconURL }
+						alt="Status Icon"
+						style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;"
+					/>
+					<better-select match="myMatcherFunction">
+						<select name="transitions" id="transitions" value={ result.Fields.Status.ID }>
+							<option value={ result.Fields.Status.ID }>
+								<span>{ result.Fields.Status.Name } </span>
+							</option>
+							for _, item := range transitions {
+								<option value={ item.ID }>
+									<span>{ item.Name } </span>
+								</option>
+							}
+						</select>
+					</better-select>
+				</div>
+				<div class="card" id="details">
+					<header class="card-header" style="text-align: left;margin-left: 10px;margin-right: 10px;">Details</header>
+					<div class="card-content">
+						<div class="grid">
+							<div class="cell -4of12">
+								<div class="content">
+									<p style="margin: 20px;">Reporter </p>
+								</div>
+							</div>
+							<div class="cell -8of12">
+								<div class="content">
+									@Profile(result.Fields.Creator.DisplayName, result.Fields.Creator.EmailAddress, result.Fields.Creator.AvatarUrls.Four8X48)
+								</div>
+							</div>
+							<div class="cell -4of12">
+								<div class="content">
+									<p style="margin: 20px;">Assignee</p>
+								</div>
+							</div>
+							<div class="cell -8of12">
+								<div class="content">
+									@Profile(result.Fields.Assignee.DisplayName, result.Fields.Assignee.EmailAddress, result.Fields.Assignee.AvatarUrls.Four8X48)
+								</div>
+							</div>
+							<div class="cell -4of12">
+								<div class="content">
+									<p style="margin: 20px;">Priority</p>
+								</div>
+							</div>
+							<div class="cell -8of12">
+								<div class="content" style="align-items: center;display: flex;height: 100%;">
+									@Priority(result.Fields.Priority.Name, result.Fields.Priority.IconURL)
+								</div>
+							</div>
+							if len(result.Fields.Labels) > 0 {
+								<div class="cell -4of12">
+									<div class="content">
+										<p style="margin: 20px;">Labels</p>
+									</div>
+								</div>
+								<div class="cell -8of12">
+									<div class="content" style="align-items: center;display: flex;height: 100%;">
+										for _, item := range result.Fields.Labels {
+											<a href={ templ.SafeURL(fmt.Sprintf("/app/%s?jql=labels %3D \"%s\"", result.Fields.Project.Key, item)) }>{ item }</a>&nbsp;
+										}
+									</div>
+								</div>
+							}
+							if len(result.Fields.FixVersions) > 0 {
+								<div class="cell -4of12">
+									<div class="content">
+										<p style="margin: 20px;">Fix versions</p>
+									</div>
+								</div>
+								<div class="cell -8of12">
+									<div class="content" style="align-items: center;display: flex;height: 100%;">
+										for _, item := range result.Fields.FixVersions {
+											<a href={ templ.SafeURL(fmt.Sprintf("/app/%s/release/%s", result.Fields.Project.Key, item.ID)) }>{ item.Name }</a> &nbsp;
+										}
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
-		<br/>
-		<h2 class="issue-summary">{ strings.TrimSpace(result.Fields.Summary) } </h2>
-		<p>Status </p>
-		<div>
-			<img
-				src={ result.Fields.Status.IconURL }
-				alt="Status Icon"
-				style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;"
-			/>
-			<p>{ result.Fields.Status.Name } </p>
-		</div>
-		<h3>Details </h3>
-		<p>Reporter </p>
-		@Profile(result.Fields.Creator.DisplayName, result.Fields.Creator.EmailAddress, result.Fields.Creator.AvatarUrls.Four8X48)
-		<p>Assignee </p>
-		@Profile(result.Fields.Assignee.DisplayName, result.Fields.Assignee.EmailAddress, result.Fields.Assignee.AvatarUrls.Four8X48)
-		<p>Priority </p>
-		<div>
-			<img
-				src={ result.Fields.Priority.IconURL }
-				alt="Status Icon"
-				style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;"
-			/>
-			{ result.Fields.Priority.Name }
-		</div>
-		<p>Labels </p>
-		for _, item := range result.Fields.Labels {
-			<a href={ templ.SafeURL(fmt.Sprintf("/app/%s?jql=labels %3D \"%s\"", result.Fields.Project.Key, item)) }>{ item }</a>
-		}
-		<p>Description </p>
-		<p>{ result.Fields.Description } </p>
-		@BugDescriptionField(fields)
-		@FixVersion(result.Fields.FixVersions, result.Fields.Project.Key)
+		<script>
+			const bugDescription = document.getElementById('bug-description');
+			const description = document.getElementById('description');
+
+			const bugData = JSON.parse(bugDescription.getAttribute('bug-description-data'));
+			const descData = JSON.parse(description.getAttribute('description-data'));
+
+			const cleanBugData = DOMPurify.sanitize(bugData);
+			const cleanDescData = DOMPurify.sanitize(descData);
+
+			bugDescription.innerHTML = cleanBugData;
+			description.innerHTML = cleanDescData;
+		</script>
 	}
 }

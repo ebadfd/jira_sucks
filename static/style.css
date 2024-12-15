@@ -21,12 +21,11 @@ html {
 
 .avatar {
     align-items: center;
-    max-width: 350px;
+    max-width: 300px;
     display: flex;
     padding: 3px;
     border-color: rgba(38, 38, 38, 0.78) !important;
 }
-
 
 .avatar .icon {
    max-width: 40px;
@@ -36,6 +35,65 @@ html {
    object-fit: cover;
 }
 
+.priority .icon {
+   width: 16px !important;
+   height: 16px !important;
+   border-radius: 0 !important;
+}
+
+.avatar p {
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+}
+
+.avatar .email {
+  font-size: 12px !important;
+}
+
 .issue-summary {
   font-size: 1.5rem !important;
+}
+
+.breadcrumb {
+  padding: 0 0.5rem;
+}
+
+.breadcrumb ul {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: end;
+}
+
+.breadcrumb li::after {
+  display: inline-block !important;
+  margin: 0 0.25rem !important;
+  content: "/\00a0" !important;
+}
+
+
+better-select {
+  /* input box */
+  --input-color: #ababab;
+  --input-background: #181818;
+  --input-border-width: 1px;
+  --input-border-color: #7d7d7d;
+  /* focused/active input box */
+  --outline-width: 1px;
+  --outline-color: rgba(38, 38, 38, 0.78) !important;
+  /* options list wrapper */
+  --menu-max-height: 16em;
+  --menu-background: var(--input-background);
+  /* options */
+  --item-padding: 0.5em;
+  --item-color: #ababab;
+  --item-background: #181818;
+  --item-color-active: #fff;
+  --item-background-active: #181818;
+  /* dropdown arrow */
+  --caret-color: var(--input-color);
+  --focus-outline-color:  #ccc;
+  --focus-outline-width:  1px;
 }

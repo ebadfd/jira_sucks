@@ -41,15 +41,13 @@ func (p *IssueServiceImpl) IssueDetails(w http.ResponseWriter, r *http.Request) 
 	})
 
 	customFields, _, err := client.Issue.GetCustomFields(issueKey)
+	transitions, _, err := client.Issue.GetTransitions(issueKey)
 
 	if err != nil {
 		panic(err)
 	}
 
-	d, _ := issue.Fields.MarshalJSON()
-	fmt.Println(string(d))
-
-	lib.Render(w, http.StatusOK, home.Issue(issue, customFields))
+	lib.Render(w, http.StatusOK, home.Issue(issue, customFields, transitions))
 
 }
 

@@ -31,7 +31,7 @@ func Base() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>Simple Jira Client</title><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/hack/0.8.1/hack.css\"><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/hack/0.8.1/dark-grey.css\"><link rel=\"stylesheet\" href=\"/static/style.css\"></head><div class=\"progress\" style=\"height: 2px;\"><div class=\"indeterminate\" style=\"background-color: #ff2e88;\"></div></div><body class=\"snow hack dark-grey\" hx-ext=\"preload\" hx-indicator=\".progress\"><div class=\"container\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>Simple Jira Client</title><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/hack/0.8.1/hack.css\"><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/hack/0.8.1/dark-grey.css\"><link rel=\"stylesheet\" href=\"/static/style.css\"><script type=\"text/javascript\" src=\"/static/purify.min.js\"></script><script src=\"https://unpkg.com/better-select@0.0.1/better-select.js\" type=\"module\"></script></head><div class=\"progress\" style=\"height: 2px;\"><div class=\"indeterminate\" style=\"background-color: #ff2e88;\"></div></div><body class=\"snow hack dark-grey\" hx-ext=\"preload\" hx-indicator=\".progress\"><div class=\"container\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
