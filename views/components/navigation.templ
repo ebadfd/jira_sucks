@@ -1,10 +1,10 @@
 package components
 
 templ Navigation() {
-	<nav>
+	<nav style="margin-top: 20px; margin-bottom: 20px">
 		<div hx-boost="true" hx-include="[name='bustCache']" hx-swap="innerHTML" hx-target=".snowframe">
 			<a hx-push-url="/" href="/" style="all: unset; display: inline-block; cursor: pointer;">
-				<p>jira sucks </p>
+				<img src="/static/logo.svg" style="max-width: 70px; height: auto;"/>
 			</a>
 		</div>
 	</nav>

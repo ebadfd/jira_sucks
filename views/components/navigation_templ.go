@@ -29,7 +29,7 @@ func Navigation() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<nav><div hx-boost=\"true\" hx-include=\"[name=&#39;bustCache&#39;]\" hx-swap=\"innerHTML\" hx-target=\".snowframe\"><a hx-push-url=\"/\" href=\"/\" style=\"all: unset; display: inline-block; cursor: pointer;\"><p>jira sucks </p></a></div></nav>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<nav style=\"margin-top: 20px; margin-bottom: 20px\"><div hx-boost=\"true\" hx-include=\"[name=&#39;bustCache&#39;]\" hx-swap=\"innerHTML\" hx-target=\".snowframe\"><a hx-push-url=\"/\" href=\"/\" style=\"all: unset; display: inline-block; cursor: pointer;\"><img src=\"/static/logo.svg\" style=\"max-width: 70px; height: auto;\"></a></div></nav>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
