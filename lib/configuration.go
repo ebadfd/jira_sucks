@@ -7,7 +7,7 @@ import (
 )
 
 var globalConfiguration = Configuration{
-	Port: "3000",
+	Port: "8080",
 }
 
 type Configuration struct {
