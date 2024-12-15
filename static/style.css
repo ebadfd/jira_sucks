@@ -97,3 +97,7 @@ better-select {
   --focus-outline-color:  #ccc;
   --focus-outline-width:  1px;
 }
+
+.issue-list-actions .btn {
+  margin: 2px !important;
+}

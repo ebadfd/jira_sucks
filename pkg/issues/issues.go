@@ -48,6 +48,29 @@ func (p *IssueServiceImpl) IssueDetails(w http.ResponseWriter, r *http.Request) 
 	}
 
 	lib.Render(w, http.StatusOK, home.Issue(issue, customFields, transitions))
+}
+
+func (p *IssueServiceImpl) IssueDetailsTransitions(w http.ResponseWriter, r *http.Request) {
+	s := context.Get(r, lib.AuthResults).(lib.AuthSession)
+	client := lib.JiraClient(s.CloudId, s.Token)
+
+	projectKey := mux.Vars(r)["key"]
+	issueKey := mux.Vars(r)["issueKey"]
+	transitionId := r.FormValue("transitionId")
+
+	_, err := client.Issue.DoTransition(issueKey, transitionId)
+
+	issue, _, err := client.Issue.Get(issueKey, &jira.GetQueryOptions{
+		ProjectKeys: projectKey,
+	})
+
+	transitions, _, err := client.Issue.GetTransitions(issueKey)
+
+	if err != nil {
+		panic(err)
+	}
+
+	lib.Render(w, http.StatusOK, home.Transitions(issue, transitions))
 
 }
 
@@ -86,5 +109,12 @@ func (p *IssueServiceImpl) Issues(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	lib.Render(w, http.StatusOK, home.Issues(issues, res.StartAt, res.MaxResults, res.Total, jql))
+	if lib.IsHTMXRequest(r) {
+		lib.Render(w, http.StatusOK, home.IssuesList(issues, res.StartAt, res.MaxResults, res.Total, jql))
+		return
+	} else {
+		lib.Render(w, http.StatusOK, home.Issues(issues, res.StartAt, res.MaxResults, res.Total, jql))
+		return
+	}
+
 }

@@ -1,6 +1,7 @@
 package oauth
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/ebadfd/jira_sucks/lib"
@@ -16,7 +17,7 @@ type JiraOAuthServiceImpl struct {
 
 func NewJiraOAuthServiceImpl(log lib.Logger, conf *lib.Configuration) *JiraOAuthServiceImpl {
 	var jiraOAuthConfig = &oauth2.Config{
-		RedirectURL:  "http://127.0.0.1:3000/auth/callback",
+		RedirectURL:  fmt.Sprintf("%s/auth/callback", conf.Host),
 		ClientID:     conf.JiraClientId,
 		ClientSecret: conf.JiraClientSecret,
 		Scopes:       JiraPermissions,

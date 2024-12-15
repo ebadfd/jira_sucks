@@ -47,11 +47,34 @@ templ DescriptionField(field string) {
 	></div>
 }
 
-templ FixVersion(results []*jira.FixVersion, projectKey string) {
-	if len(results) > 0 && results[0] != nil {
-		<p>Fix versions </p>
-		<a href={ templ.SafeURL(fmt.Sprintf("/app/%s/release/%s", projectKey, results[0].ID)) }>{ results[0].Name }</a>
-	}
+templ Transitions(result *jira.Issue, transitions []jira.Transition) {
+	<div id="transitions-better-select">
+		<better-select>
+			<select
+				name="transitionId"
+				id="transitions"
+				value={ result.Fields.Status.ID }
+				hx-post={ fmt.Sprintf("/app/%s/issues/%s/transitions", result.Fields.Project.Key, result.Key) }
+				hx-trigger="change"
+				hx-swap="outerHTML"
+				hx-target="#transitions-better-select"
+			>
+				<option value={ result.Fields.Status.ID }>
+					<span>{ result.Fields.Status.Name } </span>
+				</option>
+				for _, item := range transitions {
+					<option value={ item.ID }>
+						<span>{ item.Name } </span>
+					</option>
+				}
+			</select>
+		</better-select>
+		<img
+			src={ result.Fields.Status.IconURL }
+			alt="Status Icon"
+			style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;"
+		/>
+	</div>
 }
 
 templ Issue(result *jira.Issue, fields jira.CustomFields, transitions []jira.Transition) {
@@ -108,23 +131,7 @@ templ Issue(result *jira.Issue, fields jira.CustomFields, transitions []jira.Tra
 			</div>
 			<div class="cell -4of12">
 				<div style="margin-bottom: 15px;">
-					<img
-						src={ result.Fields.Status.IconURL }
-						alt="Status Icon"
-						style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;"
-					/>
-					<better-select match="myMatcherFunction">
-						<select name="transitions" id="transitions" value={ result.Fields.Status.ID }>
-							<option value={ result.Fields.Status.ID }>
-								<span>{ result.Fields.Status.Name } </span>
-							</option>
-							for _, item := range transitions {
-								<option value={ item.ID }>
-									<span>{ item.Name } </span>
-								</option>
-							}
-						</select>
-					</better-select>
+					@Transitions(result, transitions)
 				</div>
 				<div class="card" id="details">
 					<header class="card-header" style="text-align: left;margin-left: 10px;margin-right: 10px;">Details</header>
@@ -137,7 +144,9 @@ templ Issue(result *jira.Issue, fields jira.CustomFields, transitions []jira.Tra
 							</div>
 							<div class="cell -8of12">
 								<div class="content">
-									@Profile(result.Fields.Creator.DisplayName, result.Fields.Creator.EmailAddress, result.Fields.Creator.AvatarUrls.Four8X48)
+									if result.Fields.Creator != nil {
+										@Profile(result.Fields.Creator.DisplayName, result.Fields.Creator.EmailAddress, result.Fields.Creator.AvatarUrls.Four8X48)
+									}
 								</div>
 							</div>
 							<div class="cell -4of12">
@@ -147,7 +156,9 @@ templ Issue(result *jira.Issue, fields jira.CustomFields, transitions []jira.Tra
 							</div>
 							<div class="cell -8of12">
 								<div class="content">
-									@Profile(result.Fields.Assignee.DisplayName, result.Fields.Assignee.EmailAddress, result.Fields.Assignee.AvatarUrls.Four8X48)
+									if result.Fields.Assignee != nil {
+										@Profile(result.Fields.Assignee.DisplayName, result.Fields.Assignee.EmailAddress, result.Fields.Assignee.AvatarUrls.Four8X48)
+									}
 								</div>
 							</div>
 							<div class="cell -4of12">
@@ -169,7 +180,7 @@ templ Issue(result *jira.Issue, fields jira.CustomFields, transitions []jira.Tra
 								<div class="cell -8of12">
 									<div class="content" style="align-items: center;display: flex;height: 100%;">
 										for _, item := range result.Fields.Labels {
-											<a href={ templ.SafeURL(fmt.Sprintf("/app/%s?jql=labels %3D \"%s\"", result.Fields.Project.Key, item)) }>{ item }</a>&nbsp;
+											<a href={ templ.SafeURL(fmt.Sprintf("/app/%s?jql=project = \"%s\"  AND labels = \"%s\"", result.Fields.Project.Key, result.Fields.Project.Key, item)) }>{ item }</a>&nbsp;
 										}
 									</div>
 								</div>
@@ -183,7 +194,7 @@ templ Issue(result *jira.Issue, fields jira.CustomFields, transitions []jira.Tra
 								<div class="cell -8of12">
 									<div class="content" style="align-items: center;display: flex;height: 100%;">
 										for _, item := range result.Fields.FixVersions {
-											<a href={ templ.SafeURL(fmt.Sprintf("/app/%s/release/%s", result.Fields.Project.Key, item.ID)) }>{ item.Name }</a> &nbsp;
+											<a href={ templ.SafeURL(fmt.Sprintf("/app/%s/releases/%s", result.Fields.Project.Key, item.ID)) }>{ item.Name }</a> &nbsp;
 										}
 									</div>
 								</div>

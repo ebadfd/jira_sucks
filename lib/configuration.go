@@ -17,6 +17,7 @@ type Configuration struct {
 	JiraAuthUri      string `mapstructure:"JIRA_AUTH_URI"`
 	JiraTokenUri     string `mapstructure:"JIRA_TOKEN_URI"`
 	SessionSecret    string `mapstructure:"SESSION_KEY"`
+	Host             string `mapstructure:"APP_HOST"`
 }
 
 func (c Configuration) Validate() error {
@@ -33,6 +34,7 @@ func NewConfiguration(logger Logger) *Configuration {
 		"JIRA_CLIENT_ID",
 		"JIRA_CLIENT_SECRET",
 		"SESSION_KEY",
+		"APP_HOST",
 	} {
 		switch key {
 		default:

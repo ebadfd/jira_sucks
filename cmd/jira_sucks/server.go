@@ -9,6 +9,7 @@ import (
 	"github.com/ebadfd/jira_sucks/pkg/issues"
 	"github.com/ebadfd/jira_sucks/pkg/oauth"
 	"github.com/ebadfd/jira_sucks/pkg/projects"
+	"github.com/ebadfd/jira_sucks/pkg/releases"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 )
@@ -28,6 +29,7 @@ func (s *ServerCommand) Run() lib.CommandRunner {
 		oauth *oauth.JiraOAuthServiceImpl,
 		projects *projects.ProjectServiceImpl,
 		issues *issues.IssueServiceImpl,
+		releases *releases.ReleaseServiceImpl,
 	) {
 		serverHost := fmt.Sprintf(":%s", conf.Port)
 		r := mux.NewRouter()
@@ -48,6 +50,9 @@ func (s *ServerCommand) Run() lib.CommandRunner {
 		app.HandleFunc("", projects.Projects)
 		app.HandleFunc("/{key}", issues.Issues)
 		app.HandleFunc("/{key}/issues/{issueKey}", issues.IssueDetails)
+		app.HandleFunc("/{key}/issues/{issueKey}/transitions", issues.IssueDetailsTransitions)
+
+		app.HandleFunc("/{key}/releases/{releaseId}", releases.ReleaseDetails)
 
 		s := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 
