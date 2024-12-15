@@ -110,6 +110,5 @@ func (h *JiraOAuthServiceImpl) OAuthJiraCallback(w http.ResponseWriter, r *http.
 		return
 	}
 
-	lib.Render(w, http.StatusBadRequest, views.ErrorPage(errors.New("Login success")))
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
