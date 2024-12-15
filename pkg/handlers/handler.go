@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/gorilla/context"
 
 	"github.com/ebadfd/jira_sucks/lib"
+	"github.com/ebadfd/jira_sucks/views"
 	"github.com/gorilla/sessions"
 )
 
@@ -18,13 +20,15 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		session, err := Store.Get(r, lib.OAuthSessionName)
 
 		if err != nil {
-			panic(err)
+			lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+			return
 		}
 
 		profileSession, err := Store.Get(r, lib.ProfileSessionName)
 
 		if err != nil {
-			panic(err)
+			lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+			return
 		}
 
 		token := session.Values[lib.OAuthStateToken]
@@ -33,11 +37,13 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		cloudId := session.Values[lib.OAuthCloudId]
 
 		if token == nil {
-			panic("no auth")
+			http.Redirect(w, r, "/auth/jira", http.StatusTemporaryRedirect)
+			return
 		}
 
 		if cloudId == nil {
-			panic("no auth")
+			http.Redirect(w, r, "/auth/jira", http.StatusTemporaryRedirect)
+			return
 		}
 
 		authResults := lib.AuthSession{
@@ -59,4 +65,8 @@ func TrailingSlashMiddleware(next http.Handler) http.Handler {
 		r.URL.Path = strings.TrimSuffix(r.URL.Path, "/")
 		next.ServeHTTP(w, r)
 	})
+}
+
+func Error(w http.ResponseWriter, r *http.Request) {
+	lib.Render(w, http.StatusOK, views.ErrorPage(errors.New("something werong wrong")))
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/andygrunwald/go-jira"
 )
 
-func JiraClient(cloudId, token string) *jira.Client {
+func JiraClient(cloudId, token string) (*jira.Client, error) {
 	base := fmt.Sprintf("https://api.atlassian.com/ex/jira/%s/", cloudId)
 	tp := jira.BearerAuthTransport{
 		Token: token,
@@ -17,10 +17,10 @@ func JiraClient(cloudId, token string) *jira.Client {
 
 	jiraClient, err := jira.NewClient(tp.Client(), base)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return jiraClient
+	return jiraClient, nil
 }
 
 type AccessibleResource struct {

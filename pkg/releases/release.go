@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/ebadfd/jira_sucks/lib"
+	"github.com/ebadfd/jira_sucks/views"
 	"github.com/ebadfd/jira_sucks/views/home"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
@@ -29,7 +30,12 @@ var Module = fx.Options(
 
 func (p *ReleaseServiceImpl) ReleaseDetails(w http.ResponseWriter, r *http.Request) {
 	s := context.Get(r, lib.AuthResults).(lib.AuthSession)
-	client := lib.JiraClient(s.CloudId, s.Token)
+	client, err := lib.JiraClient(s.CloudId, s.Token)
+
+	if err != nil {
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
+	}
 
 	projectKey := mux.Vars(r)["key"]
 	releaseId := mux.Vars(r)["releaseId"]
@@ -37,13 +43,15 @@ func (p *ReleaseServiceImpl) ReleaseDetails(w http.ResponseWriter, r *http.Reque
 	i, err := strconv.Atoi(releaseId)
 
 	if err != nil {
-		panic(err)
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
 	}
 
 	release, _, err := client.Version.Get(i)
 
 	if err != nil {
-		panic(err)
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
 	}
 
 	lib.Render(w, http.StatusOK, home.Release(release, projectKey))

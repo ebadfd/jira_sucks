@@ -1,0 +1,19 @@
+package views
+
+import "github.com/ebadfd/jira_sucks/views/layouts"
+import "strings"
+
+templ ErrorPage(er error) {
+	@layouts.Base() {
+		if (strings.Contains(er.Error(), "Login success")) {
+			<h2>Successfully authenticated </h2>
+		} else {
+			<h2>Something went wrong </h2>
+		}
+		<p>{ er.Error() }</p>
+		if (strings.Contains(er.Error(), "Status code: 401")) {
+			<p>The JIRA api token must have been expired </p>
+			<a href="/auth/jira">click here to re-auth </a>
+		}
+	}
+}

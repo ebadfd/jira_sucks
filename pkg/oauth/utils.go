@@ -12,11 +12,11 @@ import (
 	"github.com/ebadfd/jira_sucks/pkg/handlers"
 )
 
-func generateStateOauthCookie(w http.ResponseWriter, r *http.Request) string {
+func generateStateOauthCookie(w http.ResponseWriter, r *http.Request) (*string, error) {
 	session, err := handlers.Store.Get(r, lib.OAuthSessionName)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	b := make([]byte, 16)
@@ -28,10 +28,10 @@ func generateStateOauthCookie(w http.ResponseWriter, r *http.Request) string {
 	err = session.Save(r, w)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return state
+	return &state, nil
 }
 
 type ExchangeTokenRequest struct {

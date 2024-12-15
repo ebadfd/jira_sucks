@@ -1,11 +1,13 @@
 package oauth
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/ebadfd/jira_sucks/lib"
 	"github.com/ebadfd/jira_sucks/pkg/handlers"
+	"github.com/ebadfd/jira_sucks/views"
 	"golang.org/x/oauth2"
 )
 
@@ -35,13 +37,18 @@ func NewJiraOAuthServiceImpl(log lib.Logger, conf *lib.Configuration) *JiraOAuth
 }
 
 func (h *JiraOAuthServiceImpl) OAuthJiraLogin(w http.ResponseWriter, r *http.Request) {
-	oauthState := generateStateOauthCookie(w, r)
+	oauthState, err := generateStateOauthCookie(w, r)
+
+	if err != nil {
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
+	}
 
 	/*
 		AuthCodeURL receive state that is a token to protect the user from CSRF attacks. You must always provide a non-empty string and
 		validate that it matches the the state query parameter on your redirect callback.
 	*/
-	u := h.oauth.AuthCodeURL(oauthState)
+	u := h.oauth.AuthCodeURL(*oauthState)
 	http.Redirect(w, r, u, http.StatusTemporaryRedirect)
 }
 
@@ -59,21 +66,29 @@ func (h *JiraOAuthServiceImpl) OAuthJiraCallback(w http.ResponseWriter, r *http.
 	res, err := h.ExchangeToken(r.FormValue("code"))
 
 	if err != nil {
-		panic(err)
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
 	}
 
 	accessibleResource, err := lib.AccessibleResources(res.AccessToken)
 
 	if err != nil {
-		panic(err)
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
 	}
 
-	client := lib.JiraClient(accessibleResource.ID, res.AccessToken)
+	client, err := lib.JiraClient(accessibleResource.ID, res.AccessToken)
+
+	if err != nil {
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
+	}
 
 	profile, _, err := client.User.GetSelf()
 
 	if err != nil {
-		panic(err)
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
 	}
 
 	session.Values[lib.OAuthStateToken] = res.AccessToken
@@ -84,14 +99,17 @@ func (h *JiraOAuthServiceImpl) OAuthJiraCallback(w http.ResponseWriter, r *http.
 	err = session.Save(r, w)
 
 	if err != nil {
-		panic(err)
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
 	}
 
 	err = profileSession.Save(r, w)
 
 	if err != nil {
-		panic(err)
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
 	}
 
-	w.Write([]byte("login success"))
+	lib.Render(w, http.StatusBadRequest, views.ErrorPage(errors.New("Login success")))
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }

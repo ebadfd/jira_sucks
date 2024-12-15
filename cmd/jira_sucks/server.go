@@ -36,6 +36,8 @@ func (s *ServerCommand) Run() lib.CommandRunner {
 
 		r.Use(handlers.TrailingSlashMiddleware)
 
+		r.HandleFunc("/test-error", handlers.Error)
+
 		r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/app", http.StatusPermanentRedirect)
 		})

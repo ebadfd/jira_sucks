@@ -7,6 +7,7 @@ import (
 
 	"github.com/andygrunwald/go-jira"
 	"github.com/ebadfd/jira_sucks/lib"
+	"github.com/ebadfd/jira_sucks/views"
 	"github.com/ebadfd/jira_sucks/views/home"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
@@ -31,7 +32,12 @@ var Module = fx.Options(
 
 func (p *IssueServiceImpl) IssueDetails(w http.ResponseWriter, r *http.Request) {
 	s := context.Get(r, lib.AuthResults).(lib.AuthSession)
-	client := lib.JiraClient(s.CloudId, s.Token)
+	client, err := lib.JiraClient(s.CloudId, s.Token)
+
+	if err != nil {
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
+	}
 
 	projectKey := mux.Vars(r)["key"]
 	issueKey := mux.Vars(r)["issueKey"]
@@ -40,11 +46,23 @@ func (p *IssueServiceImpl) IssueDetails(w http.ResponseWriter, r *http.Request) 
 		ProjectKeys: projectKey,
 	})
 
+	if err != nil {
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
+	}
+
 	customFields, _, err := client.Issue.GetCustomFields(issueKey)
+
+	if err != nil {
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
+	}
+
 	transitions, _, err := client.Issue.GetTransitions(issueKey)
 
 	if err != nil {
-		panic(err)
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
 	}
 
 	lib.Render(w, http.StatusOK, home.Issue(issue, customFields, transitions))
@@ -52,22 +70,38 @@ func (p *IssueServiceImpl) IssueDetails(w http.ResponseWriter, r *http.Request) 
 
 func (p *IssueServiceImpl) IssueDetailsTransitions(w http.ResponseWriter, r *http.Request) {
 	s := context.Get(r, lib.AuthResults).(lib.AuthSession)
-	client := lib.JiraClient(s.CloudId, s.Token)
+	client, err := lib.JiraClient(s.CloudId, s.Token)
+
+	if err != nil {
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
+	}
 
 	projectKey := mux.Vars(r)["key"]
 	issueKey := mux.Vars(r)["issueKey"]
 	transitionId := r.FormValue("transitionId")
 
-	_, err := client.Issue.DoTransition(issueKey, transitionId)
+	_, err = client.Issue.DoTransition(issueKey, transitionId)
+
+	if err != nil {
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
+	}
 
 	issue, _, err := client.Issue.Get(issueKey, &jira.GetQueryOptions{
 		ProjectKeys: projectKey,
 	})
 
+	if err != nil {
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
+	}
+
 	transitions, _, err := client.Issue.GetTransitions(issueKey)
 
 	if err != nil {
-		panic(err)
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
 	}
 
 	lib.Render(w, http.StatusOK, home.Transitions(issue, transitions))
@@ -76,7 +110,13 @@ func (p *IssueServiceImpl) IssueDetailsTransitions(w http.ResponseWriter, r *htt
 
 func (p *IssueServiceImpl) Issues(w http.ResponseWriter, r *http.Request) {
 	s := context.Get(r, lib.AuthResults).(lib.AuthSession)
-	client := lib.JiraClient(s.CloudId, s.Token)
+	client, err := lib.JiraClient(s.CloudId, s.Token)
+
+	if err != nil {
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
+	}
+
 	projectKey := mux.Vars(r)["key"]
 
 	startAtStr := r.URL.Query().Get("startAt")
@@ -106,7 +146,8 @@ func (p *IssueServiceImpl) Issues(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		panic(err)
+		lib.Render(w, http.StatusBadRequest, views.ErrorPage(err))
+		return
 	}
 
 	if lib.IsHTMXRequest(r) {
@@ -116,5 +157,4 @@ func (p *IssueServiceImpl) Issues(w http.ResponseWriter, r *http.Request) {
 		lib.Render(w, http.StatusOK, home.Issues(issues, res.StartAt, res.MaxResults, res.Total, jql))
 		return
 	}
-
 }
