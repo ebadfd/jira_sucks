@@ -1,4 +1,7 @@
-# Jira_Sucks
+<p align="center">
+    <img src="https://raw.githubusercontent.com/ebadfd/jira_sucks/refs/heads/main/static/logo.jpg" width="80" />
+    <h2 align="center">Simple Jira Client</h2>
+</p>
 
 A simple and lightweight Jira client for faster and smoother workflows
 
