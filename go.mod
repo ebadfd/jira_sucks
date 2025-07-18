@@ -14,7 +14,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	go.uber.org/fx v1.23.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/oauth2 v0.24.0
+	golang.org/x/oauth2 v0.27.0
 )
 
 require (
